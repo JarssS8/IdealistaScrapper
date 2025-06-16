@@ -6,6 +6,7 @@ import schedule
 import os
 import random
 import sys
+from datetime import datetime, timedelta
 
 DISCORD_WEBHOOK_URL = os.environ.get("DISCORD_WEBHOOK_URL")
 if not DISCORD_WEBHOOK_URL:
@@ -236,3 +237,7 @@ if __name__ == "__main__":
     while True:
         schedule.run_pending()
         time.sleep(1)
+
+    # Suponiendo que cada piso tiene un campo 'created_at' en formato datetime
+    una_hora_atras = datetime.now() - timedelta(hours=1)
+    pisos_recientes = [piso for piso in pisos if piso['created_at'] >= una_hora_atras]

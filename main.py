@@ -6,7 +6,6 @@ import schedule
 import os
 import random
 import sys
-from datetime import datetime, timedelta
 
 DISCORD_WEBHOOK_URL = os.environ.get("DISCORD_WEBHOOK_URL")
 if not DISCORD_WEBHOOK_URL:
@@ -117,6 +116,8 @@ def obtener_pisos():
 
             tiempo_tag = item.select_one(".txt-highlight-red")
             publicado = tiempo_tag.get_text(strip=True) if tiempo_tag else "desconocido"
+            if not "minutos" in publicado:
+                continue  # Solo consideramos pisos publicados en los últimos minutos
 
             img_tag = item.select_one("img")
             imagen_url = img_tag.get("src") if img_tag else ""
@@ -237,7 +238,3 @@ if __name__ == "__main__":
     while True:
         schedule.run_pending()
         time.sleep(1)
-
-    # Suponiendo que cada piso tiene un campo 'created_at' en formato datetime
-    una_hora_atras = datetime.now() - timedelta(hours=1)
-    pisos_recientes = [piso for piso in pisos if piso['created_at'] >= una_hora_atras]

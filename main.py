@@ -18,7 +18,7 @@ ZONA_URL = os.environ.get(
     "ZONA_URL",
     "https://www.idealista.com/alquiler-viviendas/madrid/zona-sur/?ordenado-por=fecha-publicacion-desc"
 )
-BASE_DE_DATOS = "pisos.db"
+BASE_DE_DATOS = "data/pisos.db"
 REFRESH_TIME = int(os.environ.get("REFRESH_TIME", 15))
 
 def get_free_proxies(n=8):
@@ -46,6 +46,8 @@ def get_free_proxies(n=8):
 
 
 def setup_db():
+    if not os.path.exists("data"):
+        os.makedirs("data")
     conn = sqlite3.connect(BASE_DE_DATOS)
     cursor = conn.cursor()
     cursor.execute("""

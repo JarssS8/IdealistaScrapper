@@ -19,7 +19,7 @@ ZONA_URL = os.environ.get(
     "https://www.idealista.com/alquiler-viviendas/madrid/zona-sur/?ordenado-por=fecha-publicacion-desc"
 )
 BASE_DE_DATOS = "data/pisos.db"
-REFRESH_TIME = int(os.environ.get("REFRESH_TIME", 15))
+REFRESH_TIME = int(os.environ.get("REFRESH_TIME", 10))  # in minutes
 
 def get_free_proxies(n=8):
     url = "https://free-proxy-list.net"
@@ -61,7 +61,7 @@ def setup_db():
     conn.commit()
     conn.close()
 
-def obtener_pisos():
+def obtener_pisos(primera_ejecucion=False):
     headers = {
         "User-Agent": "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/125.0.0.0 Safari/537.36",
         "Accept-Language": "es-ES,es;q=0.9",
@@ -118,7 +118,7 @@ def obtener_pisos():
 
             tiempo_tag = item.select_one(".txt-highlight-red")
             publicado = tiempo_tag.get_text(strip=True) if tiempo_tag else "desconocido"
-            if not "minutos" in publicado:
+            if not "minutos" in publicado and not primera_ejecucion:
                 continue  # Solo consideramos pisos publicados en los últimos minutos
 
             img_tag = item.select_one("img")
@@ -207,8 +207,9 @@ def registrar_y_enviar_nuevos(pisos):
 
 def primera_ejecucion():
     print("🔰 Primera ejecución. Enviando los últimos 5 pisos...")
-    pisos = obtener_pisos()
+    pisos = obtener_pisos(primera_ejecucion=True)
     filtrados = pisos[:5]
+    filtrados.reverse() 
     for piso in filtrados:
         enviar_discord(piso)
         registrar_piso(piso)
@@ -217,6 +218,7 @@ def primera_ejecucion():
 def tarea_periodica():
     print("\n⏱️ Ejecutando tarea periódica...")
     pisos = obtener_pisos()
+    pisos.reverse()
     registrar_y_enviar_nuevos(pisos)
 
 
